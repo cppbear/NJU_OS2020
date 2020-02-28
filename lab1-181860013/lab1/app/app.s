@@ -2,8 +2,8 @@
 
 .global start
 start:
-	pushl $14
-	pushl $message
+	pushl $2004
+	pushl $ascpic
 	calll displayStr
 loop:
 	jmp loop
