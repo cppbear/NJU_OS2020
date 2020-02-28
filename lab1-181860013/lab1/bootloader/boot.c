@@ -9,8 +9,9 @@ void bootMain(void) {
 	for (i = 0; i < 200; i++) {
 		readSect((void*)(elf + i*512), 1+i);
 	}
-	// readSect((void*)elf, 1); // loading sector 1 to 0x8c00
+	readSect((void*)elf, 1); // loading sector 1 to 0x8c00
 	// TODO jumping to the loaded program
+	elf();
 }
 
 void waitDisk(void) { // waiting for disk
