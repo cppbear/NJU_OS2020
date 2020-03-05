@@ -21,7 +21,6 @@ start32:
 	movw $0x18, %ax
 	movw %ax, %gs
 	movl $(128 << 20), %esp
-	sub $16, %esp
 	jmp bootMain                    # 跳转⾄bootMain函数  定义于boot.c
 
 gdt:
