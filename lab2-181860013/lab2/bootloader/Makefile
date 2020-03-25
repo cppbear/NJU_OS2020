@@ -30,7 +30,7 @@ BOBJS = $(BSFILES:.S=.o) $(BCFILES:.c=.o)
 
 bootloader.bin: $(BOBJS)
 	$(LD) $(LDFLAGS) -e start -Ttext 0x7c00 -o bootloader.elf $(BOBJS)
-	objcopy -O binary bootloader.elf bootloader.bin
+	objcopy -S -j .text -O binary bootloader.elf bootloader.bin
 	@../utils/genBoot.pl bootloader.bin
 
 clean:

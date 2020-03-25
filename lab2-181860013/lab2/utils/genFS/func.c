@@ -694,74 +694,39 @@ int cp (const char *driver, const char *srcFilePath, const char *destFilePath) {
     // TODO in lab2
     FILE *srcfile = NULL;
     FILE *destfile = NULL;
-    char srctmp = 0;
-    char desttemp = 0;
-    int srclength = 0;
+    char desttmp = 0;
     int destlength = 0;
-    int srccond = 0;
-    int destcond = 0;
     int ret = 0;
     int size = 0;
     SuperBlock superBlock;
     int fatherInodeOffset = 0;
-    int srcInodeOffset = 0;
     int destInodeOffset = 0;
     Inode fatherInode;
-    Inode srcInode;
     Inode destInode;
-    if (driver == NULL)
+    if (srcFilePath == NULL)
     {
-        printf("driver == NULL.\n");
+        printf("srcFilePath == NULL.\n");
         return -1;
     }
-    srcfile = fopen(driver, "r+");
+    srcfile = fopen(srcFilePath, "r+");
     if (srcfile == NULL)
+    {
+        printf("Failed to open srcFilePath.\n");
+        return -1;
+    }
+    destfile = fopen(driver, "r+");
+    if (destfile == NULL)
     {
         printf("Failed to open driver.\n");
         return -1;
     }
-    ret = readSuperBlock(srcfile, &superBlock);
+    ret = readSuperBlock(destfile, &superBlock);
     if (ret == -1)
     {
         printf("Failed to load SuperBlock.\n");
-        fclose(srcfile);
+        fclose(destfile);
         return -1;
     }
-    //find src file
-    if (srcFilePath == NULL)
-    {
-        printf("srcFilePath == NULL");
-        fclose(srcfile);
-        return -1;
-    }
-    srclength = stringLen(srcFilePath);
-    if (srcFilePath[srclength - 1] == '/')
-    {
-        srccond = 1;
-        *((char *)srcFilePath + srclength - 1) = 0;
-    }
-    /*
-    ret = stringChrR(srcFilePath, '/', &size);
-    if (ret == -1)
-    {
-        printf("Incorrect destination file path.\n");
-        fclose(file);
-        return -1;
-    }
-    srctmp = *((char *)srcFilePath + size + 1);
-    *((char *)srcFilePath + size + 1) = 0;
-    */
-    ret = readInode(srcfile, &superBlock, &srcInode, &srcInodeOffset, srcFilePath);
-    //*((char *)srcFilePath + size + 1) = srctmp;
-    if (ret == -1)
-    {
-        printf("Failed to read src inode.\n");
-        if (srccond == 1)
-            *((char *)srcFilePath + srclength - 1) = '/';
-        fclose(srcfile);
-        return -1;
-    }
-    //find dest file
     if (destFilePath == NULL)
     {
         printf("destFilePath == NULL");
@@ -769,12 +734,6 @@ int cp (const char *driver, const char *srcFilePath, const char *destFilePath) {
         return -1;
     }
     destlength = stringLen(destFilePath);
-    if (destFilePath[destlength - 1] == '/')
-    {
-        destcond = 1;
-        *((char *)destFilePath + destlength - 1) = 0;
-    }
-    
     ret = stringChrR(destFilePath, '/', &size);
     if (ret == -1)
     {
@@ -782,16 +741,13 @@ int cp (const char *driver, const char *srcFilePath, const char *destFilePath) {
         fclose(destfile);
         return -1;
     }
-    srctmp = *((char *)destFilePath + size + 1);
+    desttmp = *((char *)destFilePath + size + 1);
     *((char *)destFilePath + size + 1) = 0;
-
     ret = readInode(destfile, &superBlock, &fatherInode, &fatherInodeOffset, destFilePath);
-    *((char *)destFilePath + size + 1) = srctmp;
+    *((char *)destFilePath + size + 1) = desttmp;
     if (ret == -1)
     {
         printf("Failed to read father inode.\n");
-        if (destcond == 1)
-            *((char *)destFilePath + destlength - 1) = '/';
         fclose(destfile);
         return -1;
     }
@@ -799,26 +755,18 @@ int cp (const char *driver, const char *srcFilePath, const char *destFilePath) {
     if (ret == -1)
     {
         printf("Failed to allocate inode.\n");
-        if (destcond == 1)
-            *((char *)destFilePath + destlength - 1) = '/';
         fclose(destfile);
         return -1;
     }
-    int ret = copyData(destfile, srcfile, &superBlock, &destInode, destInodeOffset);
+    ret = copyData(destfile, srcfile, &superBlock, &destInode, destInodeOffset);
     if (ret == -1)
     {
         printf("Failed to copy data.\n");
-        if (destcond == 1)
-            *((char *)destFilePath + destlength - 1) = '/';
         fclose(destfile);
         return -1;
     }
-    if (srccond == 1)
-        *((char *)srcFilePath + srclength - 1) = '/';
-    if (destcond == 1)
-        *((char *)destFilePath + destlength - 1) = '/';
     printf("cp %s to %s\n", srcFilePath, destFilePath);
-    printf("MKDIR success.\n%d inodes and %d data blocks available.\n", superBlock.availInodeNum, superBlock.availBlockNum);
+    printf("CP success.\n%d inodes and %d data blocks available.\n", superBlock.availInodeNum, superBlock.availBlockNum);
     fclose(srcfile);
     fclose(destfile);
     return 0;

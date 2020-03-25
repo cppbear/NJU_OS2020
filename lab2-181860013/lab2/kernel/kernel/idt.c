@@ -76,6 +76,7 @@ void initIdt() {
 	//setIntr(idt + 0x5, SEG_KCODE, , DPL_USER); // for bound, interrupt vector is 0x5, Interruption is disabled
 	setIntr(idt + 0x20, SEG_KCODE, (uint32_t)irqTimer, DPL_KERN);
 	// TODO in lab2
+	setTrap(idt + 0x21, SEG_KCODE, (uint32_t)irqKeyboard, DPL_KERN);
 	setIntr(idt + 0x80, SEG_KCODE, (uint32_t)irqSyscall, DPL_USER); // for int 0x80, interrupt vector is 0x80, Interruption is disabled
 
 	/* 写入IDT */
