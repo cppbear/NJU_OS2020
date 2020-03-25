@@ -1,11 +1,5 @@
 #include "lib.h"
 #include "types.h"
-
-#define _INTSIZEOF(n) ((sizeof(n) + sizeof(int) - 1) & ~(sizeof(int) - 1))
-#define va_start(ap, format) (ap = (char *)&format + _INTSIZEOF(format))
-#define va_arg(ap, type) (*(type *)((ap += _INTSIZEOF(type)) - _INTSIZEOF(type)))
-#define va_end(ap) (ap = (char *)0)
-
 /*
  * io lib here
  * 库函数写在这
@@ -66,11 +60,12 @@ int hex2Str(uint32_t hexadecimal, char *buffer, int size, int count);
 int str2Str(char *string, char *buffer, int size, int count);
 
 void printf(const char *format,...){
-	char *ap;
-	va_start(ap, format);
 	int i=0; // format index
 	char buffer[MAX_BUFFER_SIZE];
 	int count=0; // buffer index
+	//int index = 0;					  // parameter index
+	void *paraList = (void *)&format; // address of format in stack
+	//int state = 0;					  // 0: legal character; 1: '%'; 2: illegal format
 	int decimal=0;
 	uint32_t hexadecimal=0;
 	char *string=0;
@@ -83,22 +78,23 @@ void printf(const char *format,...){
 		{
 			count--;
 			i++;
+			paraList += sizeof(format);
 			switch (format[i])
 			{
 			case 'c':
-				character = va_arg(ap, char);
+				character = *(char *)paraList;
 				buffer[count++] = character;
 				break;
 			case 's':
-				string = va_arg(ap, char *);
+				string = *(char **)paraList;
 				count = str2Str(string, buffer, (uint32_t)MAX_BUFFER_SIZE, count);
 				break;
 			case 'x':
-				hexadecimal = va_arg(ap, uint32_t);
+				hexadecimal = *(uint32_t *)paraList;
 				count = hex2Str(hexadecimal, buffer, (uint32_t)MAX_BUFFER_SIZE, count);
 				break;
 			case 'd':
-				decimal = va_arg(ap, int);
+				decimal = *(int *)paraList;
 				count = dec2Str(decimal, buffer, (uint32_t)MAX_BUFFER_SIZE, count);
 				break;
 			case '%':
@@ -113,7 +109,7 @@ void printf(const char *format,...){
 		}
 		i++;
 	}
-	if(count!=0)
+	if (count != 0)
 		syscall(SYS_WRITE, STD_OUT, (uint32_t)buffer, (uint32_t)count, 0, 0);
 }
 

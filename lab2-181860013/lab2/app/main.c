@@ -15,7 +15,7 @@ int uEntry(void) {
 	//printf("Scroll Screen Test.\n");
 	//data = 'H';
 	//printf("%c\n", data);
-	/*
+	
 	printf("printf test begin...\n");
 	printf("the answer should be:\n");
 	printf("#######################################################\n");
@@ -37,7 +37,7 @@ int uEntry(void) {
 	printf("%x, %x, %x, %x, %x, %x\n", 0, 0xffffffff, 0x80000000, 0xabcdef01, -32768, 102030);
 	printf("=======================================================\n");
 	printf("Test end!!! Good luck!!!\n");
-	*/
+	
 	while(1);
 	return 0;
 }
