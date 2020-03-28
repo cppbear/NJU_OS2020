@@ -64,7 +64,6 @@ void keyboardHandle(struct TrapFrame *tf) {
 	if (keyCode == 0)
 		return;
 	putChar(getChar(keyCode));
-	return;
 }
 
 void syscallWrite(struct TrapFrame *tf) {
