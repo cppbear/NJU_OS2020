@@ -13,7 +13,7 @@ int uEntry(void) {
 	//asm volatile("bound ...");//XXX equivalent to int 0x5?
 	//printf("1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22\n23\n24\n25\n26\n27\n");
 	//printf("Scroll Screen Test.\n");
-	//data = 'H';
+	//char data = 'H';
 	//printf("%c\n", data);
 	
 	printf("printf test begin...\n");
