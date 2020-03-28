@@ -98,6 +98,7 @@ void printf(const char *format,...){
 				count = dec2Str(decimal, buffer, (uint32_t)MAX_BUFFER_SIZE, count);
 				break;
 			case '%':
+				paraList -= sizeof(format);
 				count++;
 				break;
 			}
