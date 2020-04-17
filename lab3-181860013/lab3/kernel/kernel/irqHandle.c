@@ -80,6 +80,46 @@ void syscallHandle(struct TrapFrame *tf) {
 
 void timerHandle(struct TrapFrame *tf) {
 	// TODO in lab3
+	uint32_t tmpStackTop;
+	for (int i = 0; i < MAX_PCB_NUM; i++)
+	{	
+		if (pcb[i].state == STATE_BLOCKED)
+		{
+			pcb[i].sleepTime--;
+			if (pcb[i].sleepTime == 0)
+				pcb[i].state = STATE_RUNNABLE;
+		}
+	}
+	pcb[current].timeCount++;
+	if (pcb[current].timeCount > MAX_TIME_COUNT)
+	{
+		int i = 1;
+		while (i < MAX_PCB_NUM)
+		{
+			if (pcb[i].state == STATE_RUNNABLE)
+				break;
+			i++;
+		}
+		if (i != MAX_PCB_NUM)
+			current = i;
+		else
+		{
+			current = 0;
+		}
+		pcb[current].state = STATE_RUNNING;
+	}
+
+	tmpStackTop = pcb[current].stackTop;
+	pcb[current].stackTop = pcb[current].prevStackTop;
+	tss.esp0 = (uint32_t)&(pcb[current].stackTop);
+	asm volatile("movl %0, %%esp" ::"m"(tmpStackTop));
+	asm volatile("popl %gs");
+	asm volatile("popl %fs");
+	asm volatile("popl %es");
+	asm volatile("popl %ds");
+	asm volatile("popal");
+	asm volatile("addl $8, %esp");
+	asm volatile("iret");
 	return;
 }
 
@@ -145,22 +185,72 @@ void syscallPrint(struct TrapFrame *tf) {
 
 void syscallFork(struct TrapFrame *tf) {
 	// TODO in lab3
+	int i, j;
+	for (i = 0; i < MAX_PCB_NUM; i++)
+	{
+		if (pcb[i].state == STATE_DEAD)
+			break;
+	}
+	if (i != MAX_PCB_NUM)
+	{
+		enableInterrupt();
+		for (j = 0; j < 0x100000; j++)
+		{
+			*(uint8_t *)(j + (i + 1) * 0x100000) = *(uint8_t *)(j + (current + 1) * 0x100000);
+		}
+		disableInterrupt();
+		for (j = 0; j < sizeof(ProcessTable); ++j)
+			*((uint8_t *)(&pcb[i]) + j) = *((uint8_t *)(&pcb[current]) + j);
+		pcb[i].stackTop = (uint32_t) & (pcb[i].regs);
+		pcb[i].prevStackTop = (uint32_t) & (pcb[i].stackTop);
+		pcb[i].state = STATE_RUNNABLE;
+		pcb[i].timeCount = 0;
+		pcb[i].sleepTime = 0;
+		pcb[i].pid = i;
+		
+		pcb[i].regs.ss = USEL(2 + 2 * i);
+		pcb[i].regs.cs = USEL(1 + 2 * i);
+		pcb[i].regs.ds = USEL(2 + 2 * i);
+		pcb[i].regs.es = USEL(2 + 2 * i);
+		pcb[i].regs.fs = USEL(2 + 2 * i);
+		pcb[i].regs.gs = USEL(2 + 2 * i);
+		
+		pcb[i].regs.eax = 0;
+		pcb[current].regs.eax = i;
+	}
+	else
+	{
+		pcb[current].regs.eax = -1;
+	}
 	return;
 }
 
 void syscallExec(struct TrapFrame *tf) {
 	// TODO in lab3
 	// hint: ret = loadElf(tmp, (current + 1) * 0x100000, &entry);
+	//char *str = (char *)tf->ecx;
+	//int size = stringLen(str);
+	//uint32_t entry;
+	//int ret = loadElf(str, (current + 1) * 0x100000, &entry);
+	
 	return;
 }
 
 void syscallSleep(struct TrapFrame *tf) {
 	// TODO in lab3
+	pcb[current].state = STATE_BLOCKED;
+	//if (tf->ecx < 0)
+	pcb[current].sleepTime = tf->ecx;
+	pcb[current].timeCount = MAX_TIME_COUNT;
+	asm volatile("int $0x20");
 	return;
 }
 
 void syscallExit(struct TrapFrame *tf) {
 	// TODO in lab3
+	pcb[current].state = STATE_DEAD;
+	pcb[current].timeCount = MAX_TIME_COUNT;
+	asm volatile("int $0x20");
 	return;
 }
 
