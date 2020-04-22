@@ -228,12 +228,15 @@ void syscallFork(struct TrapFrame *tf) {
 void syscallExec(struct TrapFrame *tf) {
 	// TODO in lab3
 	// hint: ret = loadElf(tmp, (current + 1) * 0x100000, &entry);
-	//char *str = (char *)tf->ecx;
-	//int size = stringLen(str);
-	//uint32_t entry;
-	//int ret = loadElf(str, (current + 1) * 0x100000, &entry);
-	
-	return;
+	char *str = (char *)(tf->ecx + (current + 1) * 0x100000);
+	uint32_t entry;
+	int ret = loadElf(str, (current + 1) * 0x100000, &entry);
+	if (ret == 0)
+	{
+		putInt(entry);
+		pcb[current].regs.eip = entry;
+	}
+	//return;
 }
 
 void syscallSleep(struct TrapFrame *tf) {

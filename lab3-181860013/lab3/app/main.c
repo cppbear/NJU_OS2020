@@ -22,7 +22,7 @@ int uEntry(void) {
 			printf("Father Process: Ping %d, %d;\n", data, i);
 			sleep(128);
 		}
-		//exec("/usr/print\0", 0);
+		exec("/usr/print\0", 0);
 		exit();
 	}
 	while(1);
