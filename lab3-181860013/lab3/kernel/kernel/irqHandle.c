@@ -80,8 +80,9 @@ void syscallHandle(struct TrapFrame *tf) {
 
 void timerHandle(struct TrapFrame *tf) {
 	// TODO in lab3
+	
 	uint32_t tmpStackTop;
-	for (int i = 0; i < MAX_PCB_NUM; i++)
+	for (int i = 1; i < MAX_PCB_NUM; i++)
 	{	
 		if (pcb[i].state == STATE_BLOCKED)
 		{
@@ -91,24 +92,39 @@ void timerHandle(struct TrapFrame *tf) {
 		}
 	}
 	pcb[current].timeCount++;
-	if (pcb[current].timeCount > MAX_TIME_COUNT)
+	int temp = current;
+	if (pcb[current].timeCount >= MAX_TIME_COUNT)
 	{
-		int i = 1;
-		while (i < MAX_PCB_NUM)
+		int i = (current + 1) % MAX_PCB_NUM;
+		while (i != current)
 		{
 			if (pcb[i].state == STATE_RUNNABLE)
 				break;
-			i++;
+			i = (i + 1) % MAX_PCB_NUM;
 		}
-		if (i != MAX_PCB_NUM)
+		if (i != current)
+		{
 			current = i;
+			//pcb[current].timeCount = 0;
+		}
 		else
 		{
-			current = 0;
+			
+			if (pcb[temp].state == STATE_RUNNABLE || pcb[temp].state == STATE_RUNNING)
+			{
+				current = temp;
+				pcb[current].timeCount = 0;
+			}
+			else
+			{
+				current = 0;
+				//pcb[current].timeCount = 0;
+			}
+			
 		}
 		pcb[current].state = STATE_RUNNING;
 	}
-
+	putChar('0' + current);
 	tmpStackTop = pcb[current].stackTop;
 	pcb[current].stackTop = pcb[current].prevStackTop;
 	tss.esp0 = (uint32_t)&(pcb[current].stackTop);
@@ -228,19 +244,31 @@ void syscallFork(struct TrapFrame *tf) {
 void syscallExec(struct TrapFrame *tf) {
 	// TODO in lab3
 	// hint: ret = loadElf(tmp, (current + 1) * 0x100000, &entry);
-	char *str = (char *)(tf->ecx + (current + 1) * 0x100000);
+	int sel = tf->ds;
+	char *str = (char *)tf->ecx;
+	int size = 12;
+	char character = 0;
+	char temp[size];
+	asm volatile("movw %0, %%es" ::"m"(sel));
+	for (int i = 0; i < size; i++)
+	{
+		asm volatile("movb %%es:(%1), %0": "=r"(character): "r"(str + i));
+		temp[i] = character;
+	}
+	putString(temp);
 	uint32_t entry;
-	int ret = loadElf(str, (current + 1) * 0x100000, &entry);
+	int ret = loadElf(temp, (current + 1) * 0x100000, &entry);
 	if (ret == 0)
 	{
 		putInt(entry);
 		pcb[current].regs.eip = entry;
 	}
-	//return;
+	return;
 }
 
 void syscallSleep(struct TrapFrame *tf) {
 	// TODO in lab3
+	
 	pcb[current].state = STATE_BLOCKED;
 	//if (tf->ecx < 0)
 	pcb[current].sleepTime = tf->ecx;
@@ -251,6 +279,7 @@ void syscallSleep(struct TrapFrame *tf) {
 
 void syscallExit(struct TrapFrame *tf) {
 	// TODO in lab3
+	
 	pcb[current].state = STATE_DEAD;
 	pcb[current].timeCount = MAX_TIME_COUNT;
 	asm volatile("int $0x20");
