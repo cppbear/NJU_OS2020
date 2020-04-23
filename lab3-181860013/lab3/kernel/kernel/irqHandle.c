@@ -260,9 +260,10 @@ void syscallExec(struct TrapFrame *tf) {
 	int ret = loadElf(temp, (current + 1) * 0x100000, &entry);
 	if (ret == 0)
 	{
-		putInt(entry);
+		//putInt(entry);
 		pcb[current].regs.eip = entry;
 	}
+	putString("set eip OK\n");
 	return;
 }
 

@@ -87,7 +87,7 @@ int loadElf(const char *filename, uint32_t physAddr, uint32_t *entry) {
 			return -1;
 		}
 	}
-	putInt(((struct ELFHeader *)elf)->entry);
+	//putInt(((struct ELFHeader *)elf)->entry);
 	*entry = ((struct ELFHeader *)elf)->entry;
 
 	struct ProgramHeader *ph = (struct ProgramHeader *)elf + ((struct ELFHeader *)elf)->phoff;
