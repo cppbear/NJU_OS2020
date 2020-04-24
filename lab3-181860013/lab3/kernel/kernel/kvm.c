@@ -70,6 +70,9 @@ void initFS () {
 
 int loadElf(const char *filename, uint32_t physAddr, uint32_t *entry) {
 	// TODO in lab3
+	putString("begin load\n");
+	putString(filename);
+	putChar('\n');
 	int ret;
 	Inode inode;
 	int inodeOffset = 0;
@@ -78,7 +81,7 @@ int loadElf(const char *filename, uint32_t physAddr, uint32_t *entry) {
 	{
 		return -1;
 	}
-	uint32_t elf = 0;
+	uint32_t elf = 0x0;
 	for (int i = 0; i < inode.blockCount; i++)
 	{
 		ret = readBlock(&sBlock, &inode, i, (uint8_t *)(elf + i * sBlock.blockSize));
@@ -89,10 +92,11 @@ int loadElf(const char *filename, uint32_t physAddr, uint32_t *entry) {
 	}
 	//putInt(((struct ELFHeader *)elf)->entry);
 	*entry = ((struct ELFHeader *)elf)->entry;
+	//putInt(((struct ELFHeader *)elf)->phoff);
 
-	struct ProgramHeader *ph = (struct ProgramHeader *)elf + ((struct ELFHeader *)elf)->phoff;
+	struct ProgramHeader *ph = (void *)elf + ((struct ELFHeader *)elf)->phoff;
 	struct ProgramHeader *eph = ph + ((struct ELFHeader *)elf)->phnum;
-	//struct ProgramHeader *eph = ph + 2;
+	//struct ProgramHeader *eph = ph + 3;
 
 	for (; ph < eph; ph++)
 	{
@@ -102,7 +106,7 @@ int loadElf(const char *filename, uint32_t physAddr, uint32_t *entry) {
 			uint32_t paddr = physAddr + ph->vaddr;
 			for (int i = 0; i < ph->filesz; i++)
 			{
-				*(uint8_t *)(paddr + i) = *(uint8_t *)(ph->off + i);
+				*(uint8_t *)(paddr + i) = *(uint8_t *)(elf + ph->off + i);
 			}
 			for (int i = ph->filesz; i < ph->memsz; i++)
 			{

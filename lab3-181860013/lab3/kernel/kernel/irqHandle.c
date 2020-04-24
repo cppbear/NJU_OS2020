@@ -124,7 +124,7 @@ void timerHandle(struct TrapFrame *tf) {
 		}
 		pcb[current].state = STATE_RUNNING;
 	}
-	putChar('0' + current);
+	//putChar('0' + current);
 	tmpStackTop = pcb[current].stackTop;
 	pcb[current].stackTop = pcb[current].prevStackTop;
 	tss.esp0 = (uint32_t)&(pcb[current].stackTop);
@@ -246,7 +246,7 @@ void syscallExec(struct TrapFrame *tf) {
 	// hint: ret = loadElf(tmp, (current + 1) * 0x100000, &entry);
 	int sel = tf->ds;
 	char *str = (char *)tf->ecx;
-	int size = 12;
+	int size = 11;
 	char character = 0;
 	char temp[size];
 	asm volatile("movw %0, %%es" ::"m"(sel));
@@ -256,14 +256,20 @@ void syscallExec(struct TrapFrame *tf) {
 		temp[i] = character;
 	}
 	putString(temp);
+	putChar('\n');
 	uint32_t entry;
 	int ret = loadElf(temp, (current + 1) * 0x100000, &entry);
 	if (ret == 0)
 	{
 		//putInt(entry);
-		pcb[current].regs.eip = entry;
+		//pcb[current].regs.eip = entry;
+		tf->eip = entry;
+		putString("set eip OK\n");
 	}
-	putString("set eip OK\n");
+	else if (ret == -1)
+	{
+		tf->eax = -1;
+	}
 	return;
 }
 
