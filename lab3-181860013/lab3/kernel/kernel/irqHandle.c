@@ -211,6 +211,7 @@ void syscallFork(struct TrapFrame *tf) {
 		for (j = 0; j < 0x100000; j++)
 		{
 			*(uint8_t *)(j + (i + 1) * 0x100000) = *(uint8_t *)(j + (current + 1) * 0x100000);
+			//asm volatile("int $0x20");
 		}
 		disableInterrupt();
 		for (j = 0; j < sizeof(ProcessTable); ++j)
@@ -271,9 +272,9 @@ void syscallExec(struct TrapFrame *tf) {
 
 void syscallSleep(struct TrapFrame *tf) {
 	// TODO in lab3
-	
 	pcb[current].state = STATE_BLOCKED;
-	//if (tf->ecx < 0)
+	if ((int)tf->ecx < 0)
+		return;
 	pcb[current].sleepTime = tf->ecx;
 	pcb[current].timeCount = MAX_TIME_COUNT;
 	asm volatile("int $0x20");
