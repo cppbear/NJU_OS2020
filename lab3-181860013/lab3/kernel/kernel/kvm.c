@@ -70,9 +70,6 @@ void initFS () {
 
 int loadElf(const char *filename, uint32_t physAddr, uint32_t *entry) {
 	// TODO in lab3
-	putString("begin load\n");
-	putString(filename);
-	putChar('\n');
 	int ret;
 	Inode inode;
 	int inodeOffset = 0;

@@ -23,7 +23,6 @@ int uEntry(void) {
 			sleep(128);
 		}
 		exec("/usr/print\0", 0);
-		printf("exec end\n");
 		exit();
 	}
 	while(1);

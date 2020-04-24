@@ -98,14 +98,13 @@ void timerHandle(struct TrapFrame *tf) {
 		int i = (current + 1) % MAX_PCB_NUM;
 		while (i != current)
 		{
-			if (pcb[i].state == STATE_RUNNABLE)
+			if (pcb[i].state == STATE_RUNNABLE || pcb[i].state == STATE_RUNNING)
 				break;
 			i = (i + 1) % MAX_PCB_NUM;
 		}
 		if (i != current)
 		{
 			current = i;
-			//pcb[current].timeCount = 0;
 		}
 		else
 		{
@@ -118,13 +117,12 @@ void timerHandle(struct TrapFrame *tf) {
 			else
 			{
 				current = 0;
-				//pcb[current].timeCount = 0;
 			}
 			
 		}
 		pcb[current].state = STATE_RUNNING;
 	}
-	//putChar('0' + current);
+	
 	tmpStackTop = pcb[current].stackTop;
 	pcb[current].stackTop = pcb[current].prevStackTop;
 	tss.esp0 = (uint32_t)&(pcb[current].stackTop);
@@ -244,8 +242,10 @@ void syscallFork(struct TrapFrame *tf) {
 void syscallExec(struct TrapFrame *tf) {
 	// TODO in lab3
 	// hint: ret = loadElf(tmp, (current + 1) * 0x100000, &entry);
+	char *temp = (char *)(tf->ecx + (current + 1) * 0x100000);
+	/*
 	int sel = tf->ds;
-	char *str = (char *)tf->ecx;
+	char *str = (char *)(tf->ecx + (current + 1) * 0x100000);
 	int size = 11;
 	char character = 0;
 	char temp[size];
@@ -255,16 +255,12 @@ void syscallExec(struct TrapFrame *tf) {
 		asm volatile("movb %%es:(%1), %0": "=r"(character): "r"(str + i));
 		temp[i] = character;
 	}
-	putString(temp);
-	putChar('\n');
+	*/
 	uint32_t entry;
 	int ret = loadElf(temp, (current + 1) * 0x100000, &entry);
 	if (ret == 0)
 	{
-		//putInt(entry);
-		//pcb[current].regs.eip = entry;
 		tf->eip = entry;
-		putString("set eip OK\n");
 	}
 	else if (ret == -1)
 	{
