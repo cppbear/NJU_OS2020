@@ -239,7 +239,6 @@ pid_t fork() {
 int exec(const char *filename, char * const argv[]) {
 	// TODO in lab3
 	syscall(SYS_EXEC, (uint32_t)filename, 0, 0, 0, 0);
-	printf("syscall end\n");
 	return 0;
 }
 
