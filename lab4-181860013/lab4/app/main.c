@@ -17,7 +17,7 @@ int uEntry(void)
 		if (ret == 4)
 			break;
 	}
-	*/
+	
 	int data = 2020;
 	int data1 = 1000;
 	int i = 4;
@@ -45,7 +45,7 @@ int uEntry(void)
 		}
 		exit();
 	}
-	/*
+	
 	int i = 4;
 	int ret = 0;
 	int value = 2;
@@ -85,8 +85,6 @@ int uEntry(void)
 		sem_destroy(&sem);
 		exit();
 	}
-
-	return 0;
 	*/
 	char ch;
 	printf("Input: 1 for bounded_buffer\n       2 for philosopher\n       3 for reader_writer\n");
