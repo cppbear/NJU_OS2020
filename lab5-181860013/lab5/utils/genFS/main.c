@@ -46,5 +46,18 @@ int main(int argc, char *argv[]) {
     stringCpy("/usr", destFilePath, NAME_LENGTH - 1);
     ls(driver, destFilePath);
 
+    stringCpy("/usr/philosopher", destFilePath, NAME_LENGTH - 1);
+    rm(driver, destFilePath);
+
+    stringCpy("/usr", destFilePath, NAME_LENGTH - 1);
+    ls(driver, destFilePath);
+
+    stringCpy(argv[4], srcFilePath, NAME_LENGTH - 1);
+    stringCpy("/usr/philosopher", destFilePath, NAME_LENGTH - 1);
+    cp(driver, srcFilePath, destFilePath);
+
+    stringCpy("/usr", destFilePath, NAME_LENGTH - 1);
+    ls(driver, destFilePath);
+
     return 0;
 }

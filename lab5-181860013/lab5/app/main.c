@@ -104,6 +104,5 @@ int uEntry(void)
 		break;
 	}
 	exit();
-	
 	return 0;
 }
