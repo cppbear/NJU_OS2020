@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
 
     stringCpy("/usr", destFilePath, NAME_LENGTH - 1);
     ls(driver, destFilePath);
-
+    
     stringCpy("/usr/philosopher", destFilePath, NAME_LENGTH - 1);
     rm(driver, destFilePath);
 
@@ -56,7 +56,16 @@ int main(int argc, char *argv[]) {
     stringCpy("/usr/philosopher", destFilePath, NAME_LENGTH - 1);
     cp(driver, srcFilePath, destFilePath);
 
+    stringCpy("/usr/test", destFilePath, NAME_LENGTH - 1);
+    mkdir(driver, destFilePath);
+
     stringCpy("/usr", destFilePath, NAME_LENGTH - 1);
+    ls(driver, destFilePath);
+    
+    stringCpy("/usr", destFilePath, NAME_LENGTH - 1);
+    rmdir(driver, destFilePath);
+
+    stringCpy("/", destFilePath, NAME_LENGTH - 1);
     ls(driver, destFilePath);
 
     return 0;

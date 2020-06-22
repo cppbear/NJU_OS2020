@@ -15,4 +15,8 @@ int ls (const char *driver, const char *destFilePath);
 
 int touch (const char *driver, const char *destFilePath);
 
+int recBlock(FILE *file, SuperBlock *superBlock, Inode *inode);
+
+int recInode(FILE *file, SuperBlock *superBlock, Inode *inode, int inodeOffset, Inode *fatherInode, const char *filename);
+
 #endif
